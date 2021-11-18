@@ -1,22 +1,17 @@
 const express = require("express");
+const { Worker } = require("worker_threads");
 
 const app = express();
-
-function someHeavyStuff() {
-  let sum = 0;
-  for (let i = 0; i < 1000000000; i++) {
-    sum += Math.random();
-  }
-  return sum;
-}
 
 app.get("/hello", (req, res) => {
   res.send("Hello World!");
 });
 
 app.get("/some-heavy-stuff", (req, res) => {
-  const result = someHeavyStuff();
-  res.send(`Finished! Result: ${result}`);
+  const worker = new Worker("./some-heavy-stuff.js");
+  worker.on("message", (result) => {
+    res.send(`Finished! Result: ${result}`);
+  });
 });
 
 const PORT = 333;
